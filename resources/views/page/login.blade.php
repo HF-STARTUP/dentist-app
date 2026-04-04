@@ -27,7 +27,7 @@
             <!-- /.login-logo -->
             <div class="card card-outline card-primary">
                 <div class="card-header text-center">
-                    <a class="h1"><span class="identColor"><b>{{ $ApplicationSetting->item_name }}</b></span> clinic</a>
+                    <a class="h1"><span class="identColor"><b>{{ $ApplicationSetting->item_name }}</b></span></a>
                 </div>
                 <div class="card-body">
                     <p class="login-box-msg m-0 p-0">@lang('Sign in to start your session')</p>
