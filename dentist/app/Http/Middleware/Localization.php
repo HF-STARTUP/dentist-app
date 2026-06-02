@@ -1,11 +1,12 @@
 <?php
 
-// Localization.php
-
 namespace App\Http\Middleware;
 
 use Closure;
-use App;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\App;
 
 class Localization
 {
@@ -14,9 +15,9 @@ class Localization
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @return mixed
+     * @return Response|RedirectResponse
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
         if (session()->has('locale')) {
             App::setLocale(session()->get('locale'));

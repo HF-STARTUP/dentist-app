@@ -18,6 +18,8 @@
     <script src="{{ asset('assets/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/js/custom/layout.js') }}"></script>
     @stack('header')
+       <!-- Vite Assets (CSS only; jQuery/plugins loaded via assets/) -->
+    @vite(['resources/css/app.css'])
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">

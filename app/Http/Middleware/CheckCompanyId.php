@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response as BaseResponse;
 
 class CheckCompanyId
 {
@@ -12,9 +13,8 @@ class CheckCompanyId
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): BaseResponse
     {
         if (
             empty(session('company_id'))
@@ -24,7 +24,7 @@ class CheckCompanyId
             return redirect('company');
         }
 
-        if (sizeof($request->route()->parameters) == 1) {
+        if (count($request->route()->parameters) == 1) {
             $paramModel = reset($request->route()->parameters);
             $companyId = $paramModel->company_id ?? '';
             if (!empty($companyId) && $companyId != session('company_id'))

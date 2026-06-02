@@ -9,7 +9,6 @@ use App\Models\PatientCaseStudy;
 use App\Models\Payment;
 use App\Models\Prescription;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -76,25 +75,66 @@ class DashboardController extends Controller
     }
 
     /**
+     * @return int|string|null
+     */
+    private function companyId()
+    {
+        return session('company_id');
+    }
+
+    /**
      * sums debit/credit monthly for bar chart
      *
      * @return array
      */
     private function monthlyDebitCredit()
     {
-        return cache()->remember('monthlyDebitCredit', 600, function () {
-            $credits = []; $debits = []; $labels = [];
-            $results = DB::select('SELECT DISTINCT YEAR(invoice_date) AS "year", MONTH(invoice_date) AS "month" FROM invoices ORDER BY year DESC LIMIT 12');
+        $companyId = $this->companyId();
+        $cacheKey = 'monthlyDebitCredit_' . ($companyId ?? 'all');
+
+        return cache()->remember($cacheKey, 600, function () use ($companyId) {
+            $credits = [];
+            $debits = [];
+            $labels = [];
+
+            $invoiceQuery = Invoice::query()
+                ->selectRaw('YEAR(invoice_date) as chart_year, MONTH(invoice_date) as chart_month')
+                ->whereNotNull('invoice_date');
+
+            if ($companyId) {
+                $invoiceQuery->where('company_id', $companyId);
+            }
+
+            $results = $invoiceQuery
+                ->groupBy('chart_year', 'chart_month')
+                ->orderByDesc('chart_year')
+                ->orderByDesc('chart_month')
+                ->limit(12)
+                ->get();
+
             foreach ($results as $result) {
-                $labels[] = '"'.date('F', mktime(0, 0, 0, $result->month, 10)).' '.$result->year.'"';
-                $credits[] = '"'.Payment::whereYear('payment_date', $result->year)->whereMonth('payment_date', $result->month)->sum('amount').'"';
-                $debits[] = '"'.Invoice::whereYear('invoice_date', $result->year)->whereMonth('invoice_date', $result->month)->sum('grand_total').'"';
+                $year = (int) $result->chart_year;
+                $month = (int) $result->chart_month;
+                $labels[] = date('F', mktime(0, 0, 0, $month, 10)) . ' ' . $year;
+
+                $paymentQuery = Payment::whereYear('payment_date', $year)
+                    ->whereMonth('payment_date', $month);
+                $monthInvoiceQuery = Invoice::whereYear('invoice_date', $year)
+                    ->whereMonth('invoice_date', $month);
+
+                if ($companyId) {
+                    $paymentQuery->where('company_id', $companyId);
+                    $monthInvoiceQuery->where('company_id', $companyId);
+                }
+
+                $credits[] = (float) $paymentQuery->sum('amount');
+                $debits[] = (float) $monthInvoiceQuery->sum('grand_total');
             }
 
             return [
                 'credits' => $credits,
                 'debits' => $debits,
-                'labels' => $labels
+                'labels' => $labels,
             ];
         });
     }
@@ -106,15 +146,21 @@ class DashboardController extends Controller
      */
     private function currentYearDebitCredit()
     {
-        return cache()->remember('currentYearDebitCredit', 600, function () {
-            $credits = 0; $debits = 0;
+        $companyId = $this->companyId();
+        $cacheKey = 'currentYearDebitCredit_' . ($companyId ?? 'all');
 
-            $credits = Payment::whereYear('payment_date', date('Y'))->sum('amount');
-            $debits = Invoice::whereYear('invoice_date', date('Y'))->sum('grand_total');
+        return cache()->remember($cacheKey, 600, function () use ($companyId) {
+            $paymentQuery = Payment::whereYear('payment_date', date('Y'));
+            $invoiceQuery = Invoice::whereYear('invoice_date', date('Y'));
+
+            if ($companyId) {
+                $paymentQuery->where('company_id', $companyId);
+                $invoiceQuery->where('company_id', $companyId);
+            }
 
             return [
-                'credits' => $credits,
-                'debits' => $debits
+                'credits' => (float) $paymentQuery->sum('amount'),
+                'debits' => (float) $invoiceQuery->sum('grand_total'),
             ];
         });
     }
@@ -126,31 +172,52 @@ class DashboardController extends Controller
      */
     private function overallDebitCredit()
     {
-        return cache()->remember('overallDebitCredit', 600, function () {
-            $credits = 0; $debits = 0;
+        $companyId = $this->companyId();
+        $cacheKey = 'overallDebitCredit_' . ($companyId ?? 'all');
 
-            $credits = Payment::sum('amount');
-            $debits = Invoice::sum('grand_total');
+        return cache()->remember($cacheKey, 600, function () use ($companyId) {
+            $paymentQuery = Payment::query();
+            $invoiceQuery = Invoice::query();
+
+            if ($companyId) {
+                $paymentQuery->where('company_id', $companyId);
+                $invoiceQuery->where('company_id', $companyId);
+            }
 
             return [
-                'credits' => $credits,
-                'debits' => $debits
+                'credits' => (float) $paymentQuery->sum('amount'),
+                'debits' => (float) $invoiceQuery->sum('grand_total'),
             ];
         });
     }
 
     private function dashboardCounts()
     {
-        return cache()->remember('dashboardCounts', 600, function () {
+        $companyId = $this->companyId();
+        $cacheKey = 'dashboardCounts_' . ($companyId ?? 'all');
+
+        return cache()->remember($cacheKey, 600, function () use ($companyId) {
+            $departmentQuery = HospitalDepartment::query();
+            $appointmentQuery = PatientAppointment::query();
+            $invoiceQuery = Invoice::query();
+            $paymentQuery = Payment::query();
+
+            if ($companyId) {
+                $departmentQuery->where('company_id', $companyId);
+                $appointmentQuery->where('company_id', $companyId);
+                $invoiceQuery->where('company_id', $companyId);
+                $paymentQuery->where('company_id', $companyId);
+            }
+
             return [
-                'departments' => HospitalDepartment::count(),
+                'departments' => $departmentQuery->count(),
                 'doctors' => User::role('Doctor')->count(),
                 'patients' => User::role('Patient')->count(),
-                'appointments' => PatientAppointment::count(),
+                'appointments' => $appointmentQuery->count(),
                 'caseStudies' => PatientCaseStudy::count(),
                 'prescriptions' => Prescription::count(),
-                'invoices' => Invoice::count(),
-                'payments' => Payment::count()
+                'invoices' => $invoiceQuery->count(),
+                'payments' => $paymentQuery->count(),
             ];
         });
     }

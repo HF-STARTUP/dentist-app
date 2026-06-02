@@ -1,4 +1,4 @@
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+<nav class="main-header navbar navbar-expand navbar-white navbar-light sticky top-0">
     <ul class="navbar-nav">
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
@@ -9,12 +9,12 @@
     </ul>
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown nav-margin">
-            <a class="nav-link dropdown-toggle profile-pic login_profile mr-2 p-0" data-toggle="dropdown" href="#">
+            <a class="nav-link dropdown-toggle flex items-center gap-1 bg-slate-200 p-1 rounded-xl" data-toggle="dropdown" href="#">
                 <img src="{{ asset($companySettings->company_logo) }}" alt="user-img" width="36" class="img-circle">
                 <b id="ambitious-user-name-id" class="hidden-xs">{{ \Illuminate\Support\Str::limit($company_full_name, 20, '...') }}</b>
                 <span class="caret"></span>
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-xl shadow-sm overflow-hidden">
                 <div class="dropdown-divider"></div>
                 @foreach ($companySwitchingInfo as $key => $value)
                     <a href="{{ route('company.companyAccountSwitch', ['company_switch' => $key]  ) }}" class="dropdown-item" @if ($key == Session::get('companyInfo')) @endif>
@@ -51,18 +51,18 @@
                     $photo = Auth::user()->photo;
                 }
             ?>
-            <a class="nav-link dropdown-toggle profile-pic login_profile p-0" data-toggle="dropdown" href="#">
+            <a class="nav-link dropdown-toggle p-1 bg-blue-200 flex items-center gap-2 px-2 rounded-full" data-toggle="dropdown" href="#">
                 <img src="{{ asset($photo) }}" alt="user-img" width="36" class="img-circle">
                 <b id="ambitious-user-name-id" class="hidden-xs">{{  strtok(Auth::user()->name, " ") }}</b>
                 <span class="caret"></span>
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <div class="dw-user-box">
-                    <div class="u-img"><img src="{{ asset($photo) }}" alt="user" /></div>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-xl shadow-sm overflow-hidden">
+                <div class="dw-user-box flex item-center gap-2">
+                    <div class="u-img rounded-xl overflow-hidden"><img src="{{ asset($photo) }}" alt="user" /></div>
                     <div class="u-text">
-                        <h4>{{ Auth::user()->name }}</h4>
+                        <h2 class="text-lg">{{ Auth::user()->name }}</h2>
                         <p class="text-muted" class="custom-padding-bottom-5">{{ \Illuminate\Support\Str::limit(Auth::user()->email, 17) }}</p>
-                        <a href="{{ route('profile.view') }}" class="btn btn-rounded btn-danger btn-sm">{{ __('View Profile') }}</a>
+                        <a href="{{ route('profile.view') }}" class="btn bg-blue-500 text-white rounded-full">{{ __('View Profile') }}</a>
                     </div>
                 </div>
                 <div class="dropdown-divider"></div>
@@ -76,7 +76,7 @@
                     <i class="fa fa-key mr-2"></i></i> {{ __('Change Password') }}
                 </a>
                 <div class="dropdown-divider"></div>
-                <a id="header-logout" href="{{ route('logout') }}" class="dropdown-item"><i class="fa fa-power-off mr-2"></i> {{ __('Logout') }}</a>
+                <a id="header-logout" href="{{ route('logout') }}" class="dropdown-item text-red-500"><i class="fa fa-power-off mr-2"></i> {{ __('Logout') }}</a>
                 <form id="logout-form" class="ambitious-display-none" action="{{ route('logout') }}" method="POST">@csrf</form>
             </div>
         </li>

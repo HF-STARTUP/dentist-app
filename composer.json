@@ -8,27 +8,25 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
-        "akaunting/money": "^1.2",
-        "fideloper/proxy": "^4.4",
-        "fruitcake/laravel-cors": "^2.0",
+        "php": "^8.1",
         "guzzlehttp/guzzle": "^7.4",
-        "laravel/framework": "^8.12",
-        "laravel/tinker": "^2.5",
-        "laravel/ui": "^3.2",
+        "laravel/framework": "^10.0",
+        "laravel/tinker": "^2.8",
+        "laravel/ui": "^4.2",
         "maatwebsite/excel": "^3.1",
-        "milon/barcode": "^8.0",
+        "milon/barcode": "^10.0",
         "plivo/plivo-php": "^4.21",
-        "spatie/laravel-permission": "^4.0",
-        "twilio/sdk": "^6.30"
+        "spatie/laravel-permission": "^6.0",
+        "twilio/sdk": "^6.30",
+        "laravel/sanctum": "^3.2"
     },
     "require-dev": {
-        "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
-        "laravel/sail": "^1.0.1",
-        "mockery/mockery": "^1.4.2",
-        "nunomaduro/collision": "^5.0",
-        "phpunit/phpunit": "^9.3.3"
+        "laravel/sail": "^1.25",
+        "mockery/mockery": "^1.6",
+        "phpunit/phpunit": "^10.0",
+        "nunomaduro/collision": "^7.0",
+        "spatie/laravel-ignition": "^2.0"
     },
     "config": {
         "optimize-autoloader": true,
@@ -52,7 +50,7 @@
             "Tests\\": "tests/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
         "post-autoload-dump": [
@@ -64,6 +62,8 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ]
+        ],
+        "dev": "vite",
+        "build": "vite build"
     }
 }
